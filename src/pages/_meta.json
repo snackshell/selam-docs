@@ -1,0 +1,16 @@
+{
+  "get-started": {
+    "title": "Get started",
+    "type": "separator"
+  },
+  "index": "Overview",
+  "quickstart": "Quickstart",
+  "models": "Models",
+  "core-concepts": {
+    "title": "Core concepts",
+    "type": "separator"
+  },
+  "text-generation": "Text generation",
+  "images-and-vision": "Images and vision",
+  "function-calling": "Function calling"
+}

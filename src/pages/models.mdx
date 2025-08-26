@@ -1,0 +1,54 @@
+# Models
+
+SelamAPI provides access to several powerful AI models, each with its own strengths and use cases. You can choose the model that best fits your needs for performance, cost, and capabilities.
+
+## Model Capabilities
+
+Here is a summary of the capabilities of our core model families:
+
+| Feature | Selam-Coder | Selam-Thinking | Selam-Plus | Selam-Turbo |
+|---|---|---|---|---|
+| **Text Generation** | ✅ | ✅ | ✅ | ✅ |
+| **Code Generation** | ✅ Expert | ✅ Good | ✅ Good | ✅ Fast |
+| **Reasoning** | ✅ Good | ✅ Expert | ✅ Good | ✅ Fast |
+| **Creative Writing**| ✅ Basic | ✅ Good | ✅ Expert | ✅ Fast |
+| **Vision** | ✅ | ✅ | ✅ | ❌ |
+| **Function Calling**| ✅ | ✅ | ✅ | ✅ |
+| **Streaming** | ✅ | ✅ | ✅ | ✅ |
+| **Context Window** | 128K | 128K | 128K | 32K |
+| **Response Speed** | Fast | Medium | Medium | Ultra-Fast |
+
+## Choosing a model
+
+For tasks requiring high accuracy and reasoning, `Selam-Thinking` is recommended. For creative and general purpose tasks, `Selam-Plus` is a great choice. `Selam-Coder` is optimized for programming tasks, while `Selam-Turbo` offers the fastest response times for real-time applications.
+
+Here is an example of how to specify a model in your API call:
+
+```javascript copy
+import OpenAI from 'openai';
+
+const client = new OpenAI({
+  apiKey: 'sk-selam-your-api-key-here',
+  baseURL: 'https://api.selamapi.com/v1'
+});
+
+async function analyzeData() {
+  const completion = await client.chat.completions.create({
+    model: 'selam-thinking', // Specify the model here
+    messages: [
+      {
+        role: 'system',
+        content: 'You are an expert data analyst.'
+      },
+      {
+        role: 'user',
+        content: 'Analyze the pros and cons of microservices.'
+      }
+    ],
+  });
+
+  console.log(completion.choices[0].message.content);
+}
+
+analyzeData();
+```
