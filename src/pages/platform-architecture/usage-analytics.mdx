@@ -1,1 +1,131 @@
 # Usage Analytics
+
+The SelamAPI platform includes a comprehensive usage analytics system to track API consumption and provide users with insights into their usage patterns.
+
+## System Logic (analytics.ts)
+
+The logic in `lib/analytics.ts` is responsible for recording every API call and aggregating the data for daily summaries. This allows us to track total requests, token counts, success/error rates, and more.
+
+```typescript copy
+// lib/analytics.ts
+import { db } from './db'
+
+export interface UsageRecord {
+  apiKeyId: string
+  userId: string
+  endpoint: string
+  method: string
+  model?: string
+  promptTokens?: number
+  completionTokens?: number
+  totalTokens?: number
+  success: boolean
+  statusCode: number
+  errorMessage?: string
+  responseTime: number
+  ipAddress?: string
+  userAgent?: string
+}
+
+/**
+ * Record API usage
+ */
+export async function recordUsage(usage: UsageRecord) {
+  // Record detailed usage
+  await db.apiUsage.create({
+    data: usage
+  })
+
+  // Update daily aggregation
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+
+  const existingUsage = await db.userUsage.findUnique({
+    where: {
+      userId_date: {
+        userId: usage.userId,
+        date: today
+      }
+    }
+  })
+
+  if (existingUsage) {
+    // Update existing record
+    await db.userUsage.update({
+      where: { id: existingUsage.id },
+      data: {
+        totalRequests: { increment: 1 },
+        successfulRequests: usage.success ? { increment: 1 } : undefined,
+        failedRequests: !usage.success ? { increment: 1 } : undefined,
+        totalTokens: { increment: usage.totalTokens || 0 },
+        promptTokens: { increment: usage.promptTokens || 0 },
+        completionTokens: { increment: usage.completionTokens || 0 },
+        // Update model-specific counters
+        ...(usage.model === 'selam-coder' && { selamCoderRequests: { increment: 1 } }),
+        ...(usage.model === 'selam-thinking' && { selamThinkingRequests: { increment: 1 } }),
+        ...(usage.model === 'selam-plus' && { selamPlusRequests: { increment: 1 } }),
+        ...(usage.model === 'selam-turbo' && { selamTurboRequests: { increment: 1 } }),
+      }
+    })
+  } else {
+    // Create new daily record
+    await db.userUsage.create({
+      data: {
+        userId: usage.userId,
+        date: today,
+        totalRequests: 1,
+        successfulRequests: usage.success ? 1 : 0,
+        failedRequests: !usage.success ? 1 : 0,
+        totalTokens: usage.totalTokens || 0,
+        promptTokens: usage.promptTokens || 0,
+        completionTokens: usage.completionTokens || 0,
+        avgResponseTime: usage.responseTime,
+        selamCoderRequests: usage.model === 'selam-coder' ? 1 : 0,
+        selamThinkingRequests: usage.model === 'selam-thinking' ? 1 : 0,
+        selamPlusRequests: usage.model === 'selam-plus' ? 1 : 0,
+        selamTurboRequests: usage.model === 'selam-turbo' ? 1 : 0,
+      }
+    })
+  }
+}
+
+/**
+ * Get user usage analytics
+ */
+export async function getUserAnalytics(userId: string, days: number = 30) {
+  const startDate = new Date()
+  startDate.setDate(startDate.getDate() - days)
+
+  const usage = await db.userUsage.findMany({
+    where: {
+      userId,
+      date: { gte: startDate }
+    },
+    orderBy: { date: 'asc' }
+  })
+
+  const totalUsage = usage.reduce((acc, day) => ({
+    totalRequests: acc.totalRequests + day.totalRequests,
+    successfulRequests: acc.successfulRequests + day.successfulRequests,
+    failedRequests: acc.failedRequests + day.failedRequests,
+    totalTokens: acc.totalTokens + day.totalTokens,
+    promptTokens: acc.promptTokens + day.promptTokens,
+    completionTokens: acc.completionTokens + day.completionTokens,
+  }), {
+    totalRequests: 0,
+    successfulRequests: 0,
+    failedRequests: 0,
+    totalTokens: 0,
+    promptTokens: 0,
+    completionTokens: 0,
+  })
+
+  return {
+    dailyUsage: usage,
+    totalUsage,
+    successRate: totalUsage.totalRequests > 0
+      ? (totalUsage.successfulRequests / totalUsage.totalRequests) * 100
+      : 0
+  }
+}
+```

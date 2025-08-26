@@ -1,1 +1,47 @@
 # Database Setup
+
+The SelamAPI platform uses a serverless PostgreSQL database from **Neon**, connected via the Prisma Client. This setup provides a robust, scalable, and cost-effective data layer.
+
+## Database Provider: Neon PostgreSQL
+
+We chose Neon for its modern, developer-friendly features:
+- **Serverless PostgreSQL**: Auto-scaling database that handles unpredictable loads.
+- **Connection Pooling**: Built-in pgBouncer for efficient management of database connections.
+- **SSL/TLS Encryption**: Ensures all data in transit is secure.
+- **Point-in-time Recovery**: Automated backups for disaster recovery.
+- **Branching**: Allows for creating instant, copy-on-write branches of the database for development and testing.
+- **Compute Auto-suspend**: Automatically suspends the database when not in use to save costs.
+
+## Prisma Client Configuration
+
+The connection to the database is managed through the Prisma Client. The client is instantiated in `lib/db.ts` and reused across the application to ensure efficient connection management.
+
+```typescript copy
+// lib/db.ts
+import { PrismaClient } from '@prisma/client'
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined
+}
+
+export const db = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['query', 'error', 'warn'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+})
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db
+
+// Connection health check
+export async function checkDatabaseConnection() {
+  try {
+    await db.$queryRaw`SELECT 1`
+    return { status: 'healthy', timestamp: new Date() }
+  } catch (error) {
+    return { status: 'unhealthy', error: error.message, timestamp: new Date() }
+  }
+}
+```

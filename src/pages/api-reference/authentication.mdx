@@ -1,1 +1,33 @@
 # Authentication
+
+All API requests to SelamAPI must be authenticated using an API key.
+
+## API Key Format
+
+SelamAPI uses secure API keys with the following format:
+`sk-selam-[64-character-hex-string]`
+
+## Getting an API Key
+1. Sign up at [selamapi.com](https://selamapi.com) (this is a placeholder link).
+2. Navigate to your user dashboard.
+3. Click "Create API Key".
+4. Copy your key and store it securely. Do not share it publicly.
+
+## Using API Keys
+
+To authenticate your requests, include your API key in the `Authorization` header of your HTTP request, using the `Bearer` token type.
+
+```http
+Authorization: Bearer sk-selam-your-api-key-here
+```
+
+Here is an example with `curl`:
+```bash copy
+curl https://api.selamapi.com/v1/chat/completions \
+  -H "Authorization: Bearer sk-selam-your-api-key-here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "selam-plus",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'
+```

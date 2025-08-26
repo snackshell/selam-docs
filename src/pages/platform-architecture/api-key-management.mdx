@@ -1,1 +1,104 @@
 # API Key Management
+
+The API key management system is a critical part of the SelamAPI platform, responsible for generating, hashing, and validating user API keys.
+
+## System Logic (api-keys.ts)
+
+The logic is contained within `lib/api-keys.ts`. It handles the creation of secure, prefixed API keys, hashes them for safe storage in the database, and provides a function to validate incoming keys against the stored hashes.
+
+```typescript copy
+// lib/api-keys.ts
+import crypto from 'crypto'
+import { db } from './db'
+import { UserTier } from '@prisma/client' // Assuming UserTier is exported or available
+
+// This function is a placeholder for the actual implementation
+declare function initializeApiKeyRateLimits(apiKeyId: string, tier: UserTier): Promise<void>;
+
+export interface ApiKeyConfig {
+  userId: string
+  name: string
+  tier: UserTier
+  expiresAt?: Date
+  permissions?: Record<string, boolean>
+}
+
+/**
+ * Generate a secure API key with sk-selam- prefix
+ */
+export function generateApiKey(): { key: string; hash: string; prefix: string } {
+  const prefix = 'sk-selam-'
+  const randomBytes = crypto.randomBytes(32)
+  const key = prefix + randomBytes.toString('hex')
+  const hash = crypto.createHash('sha256').update(key).digest('hex')
+  const displayPrefix = key.substring(0, 16) + '...'
+
+  return { key, hash, prefix: displayPrefix }
+}
+
+/**
+ * Create a new API key for a user
+ */
+export async function createApiKey(config: ApiKeyConfig) {
+  const { key, hash, prefix } = generateApiKey()
+
+  const apiKey = await db.apiKey.create({
+    data: {
+      userId: config.userId,
+      keyHash: hash,
+      keyPrefix: prefix,
+      name: config.name,
+      tier: config.tier,
+      expiresAt: config.expiresAt,
+      permissions: config.permissions || {}
+    }
+  })
+
+  // Initialize rate limits for the API key
+  await initializeApiKeyRateLimits(apiKey.id, config.tier)
+
+  return { ...apiKey, key } // Return the actual key only once
+}
+
+/**
+ * Validate API key and return user info
+ */
+export async function validateApiKey(key: string) {
+  const hash = crypto.createHash('sha256').update(key).digest('hex')
+
+  const apiKey = await db.apiKey.findUnique({
+    where: { keyHash: hash },
+    include: {
+      user: true,
+      rateLimit: true
+    }
+  })
+
+  if (!apiKey || !apiKey.isActive) {
+    return null
+  }
+
+  if (apiKey.expiresAt && apiKey.expiresAt < new Date()) {
+    return null
+  }
+
+  // Update last used timestamp
+  await db.apiKey.update({
+    where: { id: apiKey.id },
+    data: { lastUsed: new Date() }
+  })
+
+  return apiKey
+}
+
+/**
+ * Create default API key for new users
+ */
+export async function createDefaultApiKey(userId: string) {
+  return createApiKey({
+    userId,
+    name: 'Default API Key',
+    tier: 'FREE'
+  })
+}
+```

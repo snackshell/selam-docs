@@ -1,1 +1,21 @@
 # Best Practices
+
+To get the most out of the SelamAPI platform, we recommend following these best practices for model selection, performance, and security.
+
+## Model Selection
+- **Selam-Coder**: Use for programming tasks, code review, and technical documentation.
+- **Selam-Thinking**: Use for analysis, research, and complex reasoning tasks.
+- **Selam-Plus**: Use for creative writing, general assistance, and content creation.
+- **Selam-Turbo**: Use for real-time applications and quick responses where speed is critical.
+
+## Performance Optimization
+- Use appropriate `max_tokens` limits to control the length and cost of your responses.
+- Adjust `temperature` based on your use case. Use lower values (e.g., 0.1-0.3) for factual, deterministic tasks, and higher values (e.g., 0.7-0.9) for creative tasks.
+- Implement streaming for long responses to improve the user experience.
+- Consider caching frequently requested, non-user-specific responses on your end to reduce latency and API calls.
+
+## Security Guidelines
+- **Store API keys securely.** Never expose them in client-side code. Use environment variables or a secret management service.
+- **Implement rate limiting on your client or application side** to prevent abuse and control costs.
+- **Validate and sanitize all user inputs** before sending them to the API to prevent prompt injection and other vulnerabilities.
+- **Monitor API usage regularly.** Set up alerts for unusual activity or unexpected spikes in usage.

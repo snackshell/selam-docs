@@ -1,1 +1,38 @@
 # Errors
+
+SelamAPI uses conventional HTTP response codes to indicate the success or failure of an API request. In general: Codes in the `2xx` range indicate success. Codes in the `4xx` range indicate an error that failed given the information provided (e.g., a required parameter was omitted, a charge failed, etc.). Codes in the `5xx` range indicate an error with SelamAPI's servers (these are rare).
+
+## Common Error Codes
+
+| Status Code | Meaning | Description |
+|---|---|---|
+| `400` | Bad Request | Your request was malformed or missing a required parameter. |
+| `401` | Unauthorized | Your API key is wrong, missing, or invalid. |
+| `429` | Too Many Requests | You have hit your rate limit. Please wait before making a new request. |
+| `500` | Internal Server Error | We had a problem with our server. Try again later. |
+| `503` | Service Unavailable | We're temporarily offline for maintenance. Please try again later. |
+
+## Error Handling Example
+
+It's important to handle errors gracefully in your application. Here is a Python example demonstrating how to catch and inspect exceptions from the API.
+
+```python copy
+from openai import OpenAI, APIError
+
+client = OpenAI(
+    api_key="sk-selam-your-api-key-here",
+    base_url="https://api.selamapi.com/v1"
+)
+
+try:
+    # Intentionally use a wrong model name to trigger an error
+    completion = client.chat.completions.create(
+        model="selam-non-existent-model",
+        messages=[{"role": "user", "content": "Hello!"}]
+    )
+except APIError as e:
+    print(f"An API error occurred: {e}")
+    print(f"Status code: {e.status_code}")
+    print(f"Error type: {e.type}")
+    print(f"Error message: {e.message}")
+```

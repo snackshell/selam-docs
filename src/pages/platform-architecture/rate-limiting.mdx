@@ -1,1 +1,134 @@
 # Rate Limiting
+
+To ensure fair usage and protect the platform from abuse, SelamAPI implements a robust rate limiting system. Rate limits are applied on a per-API-key basis and are determined by the user's subscription tier.
+
+## System Logic (rate-limit.ts)
+
+The logic for checking and updating rate limits is contained in `lib/rate-limit.ts`. It uses a combination of database records and potentially a high-speed cache like Redis to track usage counts for different time windows.
+
+```typescript copy
+// lib/rate-limit.ts
+import { db } from './db'
+import { UserTier } from '@prisma/client'
+
+interface TierLimits {
+  minute: number
+  hour: number
+  day: number
+  month: number
+}
+
+const TIER_LIMITS: Record<UserTier, TierLimits> = {
+  FREE: {
+    minute: 5,
+    hour: 100,
+    day: 100,
+    month: 1000
+  },
+  STARTER: {
+    minute: 10,
+    hour: 500,
+    day: 1000,
+    month: 10000
+  },
+  PRO: {
+    minute: 50,
+    hour: 2000,
+    day: 10000,
+    month: 100000
+  },
+  ENTERPRISE: {
+    minute: 200,
+    hour: 10000,
+    day: -1, // Unlimited
+    month: -1 // Unlimited
+  }
+}
+
+/**
+ * Initialize rate limits for an API key
+ */
+export async function initializeApiKeyRateLimits(apiKeyId: string, tier: UserTier) {
+  const limits = TIER_LIMITS[tier]
+
+  // This would create a rate limit record in the database
+  return db.rateLimit.create({
+    data: {
+      apiKeyId,
+      userId: '', // This would be set by a relation in a real scenario
+      minuteLimit: limits.minute,
+      hourLimit: limits.hour,
+      dayLimit: limits.day,
+      monthLimit: limits.month
+    }
+  })
+}
+
+/**
+ * Check if API key has exceeded rate limits
+ */
+export async function checkRateLimit(apiKeyId: string): Promise<{
+  allowed: boolean
+  resetTime?: Date
+  remaining?: number
+  limit?: number
+}> {
+  const rateLimit = await db.rateLimit.findUnique({
+    where: { apiKeyId }
+  })
+
+  if (!rateLimit) {
+    return { allowed: false }
+  }
+
+  const now = new Date()
+
+  // Check minute limit
+  const minutesSinceReset = Math.floor((now.getTime() - rateLimit.lastResetMinute.getTime()) / (1000 * 60))
+
+  if (minutesSinceReset >= 1) {
+    // Reset minute counter
+    await db.rateLimit.update({
+      where: { apiKeyId },
+      data: {
+        minuteCount: 0,
+        lastResetMinute: now
+      }
+    })
+    rateLimit.minuteCount = 0
+  }
+
+  if (rateLimit.minuteCount >= rateLimit.minuteLimit) {
+    const resetTime = new Date(rateLimit.lastResetMinute.getTime() + 60000)
+    return {
+      allowed: false,
+      resetTime,
+      remaining: 0,
+      limit: rateLimit.minuteLimit
+    }
+  }
+
+  // Similar checks for hour, day, month...
+
+  return {
+    allowed: true,
+    remaining: rateLimit.minuteLimit - rateLimit.minuteCount,
+    limit: rateLimit.minuteLimit
+  }
+}
+
+/**
+ * Increment rate limit counters
+ */
+export async function incrementRateLimit(apiKeyId: string) {
+  return db.rateLimit.update({
+    where: { apiKeyId },
+    data: {
+      minuteCount: { increment: 1 },
+      hourCount: { increment: 1 },
+      dayCount: { increment: 1 },
+      monthCount: { increment: 1 }
+    }
+  })
+}
+```

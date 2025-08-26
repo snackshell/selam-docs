@@ -1,1 +1,121 @@
 # Migrations & Maintenance
+
+This section covers how database schema changes are managed and how the health of the database is monitored.
+
+## Database Migrations
+
+We use Prisma Migrate to handle database schema changes. It provides a straightforward, repeatable process for evolving the database schema in a development environment and deploying those changes to production.
+
+### Migration Commands
+```bash
+# Generate Prisma client after schema changes
+npx prisma generate
+
+# Create and apply a new migration in development
+npx prisma migrate dev --name <migration-name>
+
+# Deploy migrations to production
+npx prisma migrate deploy
+
+# Reset the database (for development only)
+npx prisma migrate reset
+
+# Open Prisma Studio to view and edit data
+npx prisma studio
+```
+
+### Seeding Data
+
+Initial data, such as system configuration or an admin user, can be seeded into the database using a seed script.
+
+```typescript copy
+// prisma/seed.ts
+import { PrismaClient, UserTier } from '@prisma/client'
+
+// This is a simplified example. Assume other necessary functions are imported.
+declare function createApiKey(config: any): Promise<void>;
+
+const prisma = new PrismaClient()
+
+async function main() {
+  // Create system configuration
+  await prisma.systemConfig.createMany({
+    data: [
+      {
+        key: 'maintenance_mode',
+        value: false,
+        description: 'Enable maintenance mode'
+      },
+      {
+        key: 'default_rate_limits',
+        value: {
+          FREE: { minute: 5, hour: 100, day: 100, month: 1000 },
+          STARTER: { minute: 10, hour: 500, day: 1000, month: 10000 },
+          PRO: { minute: 50, hour: 2000, day: 10000, month: 100000 },
+          ENTERPRISE: { minute: 200, hour: 10000, day: -1, month: -1 }
+        },
+        description: 'Default rate limits by tier'
+      }
+    ]
+  })
+
+  // Create admin user
+  const adminUser = await prisma.user.create({
+    data: {
+      email: 'admin@selamapi.com',
+      name: 'Admin User',
+      tier: 'ENTERPRISE',
+      isActive: true
+    }
+  })
+
+  console.log('Database seeded successfully')
+}
+
+main()
+  .catch((e) => {
+    console.error(e)
+    process.exit(1)
+  })
+  .finally(async () => {
+    await prisma.$disconnect()
+  })
+```
+
+## Database Monitoring & Maintenance
+
+We have scripts for performing health checks and routine cleanup jobs to ensure the database remains performant and healthy.
+
+### Health Checks (`db-health.ts`)
+The `performHealthCheck` function runs a series of checks against the database, such as connection status, table existence, and index performance.
+
+```typescript copy
+// lib/db-health.ts
+import { db } from './db'
+
+export async function performHealthCheck() {
+  // ... (health check logic would be here)
+}
+```
+
+### Cleanup Jobs (`cleanup.ts`)
+Scheduled jobs are run to clean up expired sessions and archive old usage data, keeping the database lean and efficient.
+
+```typescript copy
+// lib/cleanup.ts
+import { db } from './db'
+
+/**
+ * Clean up expired sessions
+ */
+export async function cleanupExpiredSessions() {
+  // ... (cleanup logic would be here)
+}
+
+/**
+ * Archive old usage data
+ */
+export async function archiveOldUsageData(daysToKeep: number = 90) {
+  // ... (archiving logic would be here)
+}
+```

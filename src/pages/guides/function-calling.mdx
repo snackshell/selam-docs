@@ -1,1 +1,56 @@
 # Function Calling
+
+Function calling allows you to describe functions to the model, and have the model intelligently output a JSON object containing arguments to call those functions. This is a powerful way to connect the model's capabilities with external tools and APIs.
+
+## Usage
+
+To use function calling, you provide a list of tools (functions) in your API request. If the model determines that a function should be called, it will respond with a `tool_calls` object containing the function name and arguments.
+
+Here is an example of how to use function calling to get weather information:
+
+```python copy
+# Function calling example
+from openai import OpenAI
+
+client = OpenAI(
+    api_key="sk-selam-your-api-key-here",
+    base_url="https://api.selamapi.com/v1"
+)
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "Get the current weather in a given location",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "location": {
+                        "type": "string",
+                        "description": "The city and state, e.g. San Francisco, CA"
+                    },
+                    "unit": {
+                        "type": "string",
+                        "enum": ["celsius", "fahrenheit"]
+                    }
+                },
+                "required": ["location"]
+            }
+        }
+    }
+]
+
+completion = client.chat.completions.create(
+    model="selam-plus",
+    messages=[
+        {"role": "user", "content": "What's the weather like in Boston?"}
+    ],
+    tools=tools,
+    tool_choice="auto"
+)
+
+print(completion.choices[0].message)
+```
+
+Your application code is then responsible for executing the function with the provided arguments and sending the result back to the model to continue the conversation.

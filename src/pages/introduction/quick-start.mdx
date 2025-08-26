@@ -1,1 +1,42 @@
 # Quick Start
+
+This guide will walk you through the basics of getting started with the SelamAPI. In just a few minutes, you'll be able to make your first API call.
+
+## 1. Get your API Key
+
+To use the SelamAPI, you first need an API key. You can get one by signing up on our platform and generating a new key from your dashboard.
+
+## 2. Install the SDK
+
+We recommend using the official OpenAI Python or Node.js libraries, as SelamAPI is fully compatible with them.
+
+```bash copy
+npm install openai
+```
+
+## 3. Make your first API call
+
+Now you can use your API key to make a request. Here's a simple example using the Python SDK to generate a chat completion.
+
+```python copy
+from openai import OpenAI
+
+# Initialize the SelamAPI client
+client = OpenAI(
+    api_key="sk-selam-your-api-key-here",
+    base_url="https://api.selamapi.com/v1"
+)
+
+# Create a chat completion
+completion = client.chat.completions.create(
+    model="selam-plus",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Explain quantum computing in simple terms."}
+    ]
+)
+
+print(completion.choices[0].message.content)
+```
+
+That's it! You've successfully made your first API call to SelamAPI. You can now explore the other models and features available in our platform.

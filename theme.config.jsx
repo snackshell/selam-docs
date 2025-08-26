@@ -22,6 +22,9 @@ const config = {
     </>
   ),
   docsRepositoryBase: 'https://github.com/example/selam-api-docs', // Placeholder
+  search: {
+    component: null,
+  },
   sidebar: {
     toggleButton: true,
     defaultMenuCollapseLevel: 1,

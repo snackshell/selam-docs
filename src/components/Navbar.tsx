@@ -9,12 +9,12 @@ export function CustomNavbar() {
           {/* Left side: Logo */}
           <div className="flex items-center">
             <Link href="/" className="font-bold text-lg text-foreground">
-              SelamAPI
+              SelamAPI Platform
             </Link>
           </div>
 
           {/* Right side: Nav links */}
-          <div className="flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-4">
             <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">Docs</a>
             <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">API Reference</a>
             <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">Log in</a>

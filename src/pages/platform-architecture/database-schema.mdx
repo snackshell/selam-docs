@@ -1,1 +1,257 @@
 # Database Schema
+
+SelamAPI uses a PostgreSQL database managed with the Prisma ORM. The schema is designed to be robust and scalable, handling everything from user authentication to detailed API usage tracking.
+
+## Complete Prisma Schema
+
+Below is the complete `schema.prisma` file that defines our entire database structure.
+
+```prisma copy
+// Prisma Schema for SelamAPI Platform
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // For migrations
+}
+
+// Better Auth Core Tables
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  image     String?
+  tier      UserTier @default(FREE)
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Better Auth Relations
+  sessions    Session[]
+  accounts    Account[]
+
+  // SelamAPI Relations
+  apiKeys     ApiKey[]
+  usage       UserUsage[]
+  subscriptions Subscription[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  ipAddress String?  @map("ip_address")
+  userAgent String?  @map("user_agent")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+  @@index([userId])
+}
+
+// API Key Management
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  keyHash     String   @unique @map("key_hash") // SHA-256 hash
+  keyPrefix   String   @map("key_prefix") // First 8 chars for display
+  name        String   // User-defined name
+  tier        UserTier
+  isActive    Boolean  @default(true) @map("is_active")
+  lastUsed    DateTime? @map("last_used")
+  expiresAt   DateTime? @map("expires_at") // Optional expiration
+  permissions Json     @default("{}") // API permissions
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  usage     ApiUsage[]
+  rateLimit RateLimit?
+
+  @@map("api_keys")
+  @@index([userId])
+  @@index([keyHash])
+  @@index([isActive])
+}
+
+// API Usage Tracking
+model ApiUsage {
+  id           String   @id @default(cuid())
+  apiKeyId     String   @map("api_key_id")
+  userId       String   @map("user_id")
+  endpoint     String   // /v1/chat/completions, /v1/models, etc.
+  method       String   // GET, POST
+  model        String?  // selam-plus, selam-coder, etc.
+  promptTokens Int      @default(0) @map("prompt_tokens")
+  completionTokens Int  @default(0) @map("completion_tokens")
+  totalTokens  Int      @default(0) @map("total_tokens")
+  success      Boolean
+  statusCode   Int      @map("status_code")
+  errorMessage String?  @map("error_message")
+  responseTime Int      @map("response_time") // milliseconds
+  ipAddress    String?  @map("ip_address")
+  userAgent    String?  @map("user_agent")
+  timestamp    DateTime @default(now())
+
+  // Relations
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_usage")
+  @@index([apiKeyId, timestamp])
+  @@index([userId, timestamp])
+  @@index([timestamp])
+  @@index([model])
+}
+
+// Rate Limiting
+model RateLimit {
+  id                String   @id @default(cuid())
+  apiKeyId          String   @unique @map("api_key_id")
+  userId            String   @map("user_id")
+
+  // Current counters
+  minuteCount       Int      @default(0) @map("minute_count")
+  hourCount         Int      @default(0) @map("hour_count")
+  dayCount          Int      @default(0) @map("day_count")
+  monthCount        Int      @default(0) @map("month_count")
+
+  // Reset timestamps
+  lastResetMinute   DateTime @default(now()) @map("last_reset_minute")
+  lastResetHour     DateTime @default(now()) @map("last_reset_hour")
+  lastResetDay      DateTime @default(now()) @map("last_reset_day")
+  lastResetMonth    DateTime @default(now()) @map("last_reset_month")
+
+  // Limits (based on tier)
+  minuteLimit       Int      @map("minute_limit")
+  hourLimit         Int      @map("hour_limit")
+  dayLimit          Int      @map("day_limit")
+  monthLimit        Int      @map("month_limit")
+
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@map("rate_limits")
+  @@index([userId])
+}
+
+// User Usage Summary
+model UserUsage {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  date            DateTime @db.Date // Daily aggregation
+  totalRequests   Int      @default(0) @map("total_requests")
+  successfulRequests Int   @default(0) @map("successful_requests")
+  failedRequests  Int      @default(0) @map("failed_requests")
+  totalTokens     Int      @default(0) @map("total_tokens")
+  promptTokens    Int      @default(0) @map("prompt_tokens")
+  completionTokens Int     @default(0) @map("completion_tokens")
+  avgResponseTime Float    @default(0) @map("avg_response_time")
+
+  // Model usage breakdown
+  selamCoderRequests   Int @default(0) @map("selam_coder_requests")
+  selamThinkingRequests Int @default(0) @map("selam_thinking_requests")
+  selamPlusRequests    Int @default(0) @map("selam_plus_requests")
+  selamTurboRequests   Int @default(0) @map("selam_turbo_requests")
+
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@map("user_usage")
+  @@index([date])
+}
+
+// Subscription Management
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  tier            UserTier
+  status          SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId String? @map("stripe_customer_id")
+  stripeSubscriptionId String? @map("stripe_subscription_id")
+  stripePriceId   String?  @map("stripe_price_id")
+  currentPeriodStart DateTime @map("current_period_start")
+  currentPeriodEnd   DateTime @map("current_period_end")
+  cancelAtPeriodEnd  Boolean @default(false) @map("cancel_at_period_end")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+  @@index([userId])
+  @@index([stripeCustomerId])
+}
+
+// System Configuration
+model SystemConfig {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  value       Json
+  description String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_config")
+}
+
+// Enums
+enum UserTier {
+  FREE
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+  INCOMPLETE
+}
+```

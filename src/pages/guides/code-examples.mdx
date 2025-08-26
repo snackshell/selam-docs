@@ -1,1 +1,129 @@
+import { Tabs, Tab } from 'nextra-theme-docs'
+
 # Code Examples
+
+Here you can find code examples for interacting with the SelamAPI in various programming languages.
+
+<Tabs items={['Python', 'TypeScript', 'Go', 'cURL']}>
+  <Tab>
+    ```python copy
+    from openai import OpenAI
+
+    # Initialize the client
+    client = OpenAI(
+        api_key="sk-selam-your-api-key-here",
+        base_url="https://api.selamapi.com/v1"
+    )
+
+    # Programming assistance with Selam-Coder
+    completion = client.chat.completions.create(
+        model="selam-coder",
+        messages=[
+            {"role": "system", "content": "You are an expert programming assistant."},
+            {"role": "user", "content": "Create a Python class for a binary search tree."}
+        ],
+        temperature=0.1,
+        max_tokens=2000
+    )
+
+    print(completion.choices[0].message.content)
+    ```
+  </Tab>
+  <Tab>
+    ```typescript copy
+    import OpenAI from 'openai';
+
+    const client = new OpenAI({
+      apiKey: 'sk-selam-your-api-key-here',
+      baseURL: 'https://api.selamapi.com/v1'
+    });
+
+    async function analyzeData() {
+      const completion = await client.chat.completions.create({
+        model: 'selam-thinking',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are an expert data analyst.'
+          },
+          {
+            role: 'user',
+            content: 'Analyze the pros and cons of microservices.'
+          }
+        ],
+        temperature: 0.3,
+        max_tokens: 3000
+      });
+
+      console.log(completion.choices[0].message.content);
+    }
+
+    analyzeData();
+    ```
+  </Tab>
+  <Tab>
+    ```go copy
+    package main
+
+    import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/sashabaranov/go-openai"
+    )
+
+    func main() {
+	config := openai.DefaultConfig("sk-selam-your-api-key-here")
+	config.BaseURL = "https://api.selamapi.com/v1"
+
+	client := openai.NewClientWithConfig(config)
+
+	resp, err := client.CreateChatCompletion(
+		context.Background(),
+		openai.ChatCompletionRequest{
+			Model: "selam-turbo",
+			Messages: []openai.ChatCompletionMessage{
+				{
+					Role:    openai.ChatMessageRoleSystem,
+					Content: "You are a helpful assistant.",
+				},
+				{
+					Role:    openai.ChatMessageRoleUser,
+					Content: "What are the key benefits of using AI?",
+				},
+			},
+		},
+	)
+
+	if err != nil {
+		log.Fatalf("ChatCompletion error: %v", err)
+	}
+
+	fmt.Println(resp.Choices[0].Message.Content)
+    }
+    ```
+  </Tab>
+  <Tab>
+    ```bash copy
+    curl -X POST "https://api.selamapi.com/v1/chat/completions" \
+      -H "Content-Type: application/json" \
+      -H "Authorization: Bearer sk-selam-your-api-key-here" \
+      -d '{
+        "model": "selam-plus",
+        "messages": [
+          {
+            "role": "system",
+            "content": "You are a creative writing assistant."
+          },
+          {
+            "role": "user",
+            "content": "Write a short story about an AI that discovers creativity."
+          }
+        ],
+        "max_tokens": 1500,
+        "temperature": 0.8
+      }'
+    ```
+  </Tab>
+</Tabs>

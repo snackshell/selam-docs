@@ -1,1 +1,28 @@
 # Endpoints
+
+The SelamAPI is structured around REST. Our API has predictable resource-oriented URLs, accepts JSON-encoded request bodies, returns JSON-encoded responses, and uses standard HTTP response codes, authentication, and verbs.
+
+## Base URL
+All API requests should be made to the following base URL:
+```
+https://api.selamapi.com
+```
+
+## OpenAI-Compatible Endpoints
+We provide full compatibility with the OpenAI API, allowing you to use their official SDKs.
+
+### Chat
+Create a model response for the given chat conversation.
+`POST /v1/chat/completions`
+
+### Models
+Lists the currently available models, and provides basic information about each one.
+`GET /v1/models`
+
+### Embeddings
+Get a vector representation of a given input that can be easily consumed by machine learning models and algorithms.
+`POST /v1/embeddings`
+
+### Completions (Legacy)
+Given a prompt, the model will return one or more predicted completions. This is a legacy endpoint and we recommend using the Chat endpoint for new applications.
+`POST /v1/completions`

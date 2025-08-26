@@ -1,1 +1,66 @@
-# Streaming
+import { Tabs, Tab } from 'nextra-theme-docs'
+
+# Streaming Responses
+
+For real-time applications, waiting for the full model response can lead to a poor user experience. By setting the `stream` parameter to `true`, you can receive the response as a stream of server-sent events, allowing you to display the text to the user token by token.
+
+This is ideal for chatbot interfaces or any application where users are waiting for a response.
+
+## Examples
+
+Here are examples of how to implement streaming in Python and JavaScript.
+
+<Tabs items={['Python', 'JavaScript']}>
+  <Tab>
+    ```python copy
+    # Python streaming example
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key="sk-selam-your-api-key-here",
+        base_url="https://api.selamapi.com/v1"
+    )
+
+    stream = client.chat.completions.create(
+        model="selam-turbo",
+        messages=[
+            {"role": "user", "content": "Write a detailed explanation of machine learning."}
+        ],
+        stream=True,
+        max_tokens=2000
+    )
+
+    for chunk in stream:
+        if chunk.choices[0].delta.content is not None:
+            print(chunk.choices[0].delta.content, end="")
+    ```
+  </Tab>
+  <Tab>
+    ```javascript copy
+    // JavaScript streaming example
+    import OpenAI from 'openai';
+
+    const client = new OpenAI({
+      apiKey: 'sk-selam-your-api-key-here',
+      baseURL: 'https://api.selamapi.com/v1'
+    });
+
+    async function main() {
+        const stream = await client.chat.completions.create({
+          model: 'selam-turbo',
+          messages: [
+            { role: 'user', content: 'Explain the future of artificial intelligence.' }
+          ],
+          stream: true,
+          max_tokens: 2000
+        });
+
+        for await (const chunk of stream) {
+          process.stdout.write(chunk.choices[0]?.delta?.content || '');
+        }
+    }
+
+    main();
+    ```
+  </Tab>
+</Tabs>
