@@ -1,16 +1,10 @@
 {
-  "get-started": {
-    "title": "Get started",
-    "type": "separator"
+  "index": {
+    "title": "Overview",
+    "display": "hidden"
   },
-  "index": "Overview",
-  "quickstart": "Quickstart",
-  "models": "Models",
-  "core-concepts": {
-    "title": "Core concepts",
-    "type": "separator"
-  },
-  "text-generation": "Text generation",
-  "images-and-vision": "Images and vision",
-  "function-calling": "Function calling"
+  "introduction": "Introduction",
+  "api-reference": "API Reference",
+  "guides": "Guides",
+  "platform-architecture": "Platform Architecture"
 }

@@ -1,0 +1,9 @@
+{
+  "database-schema": "Database Schema",
+  "authentication-auth": "Authentication (Better Auth)",
+  "api-key-management": "API Key Management",
+  "rate-limiting": "Rate Limiting",
+  "usage-analytics": "Usage Analytics",
+  "database-setup": "Database Setup",
+  "migrations-and-maintenance": "Migrations & Maintenance"
+}

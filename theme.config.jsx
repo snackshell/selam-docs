@@ -1,28 +1,12 @@
 /* eslint-disable react-hooks/rules-of-hooks */
-import { useRouter } from 'next/router'
 import { useConfig } from 'nextra-theme-docs'
-
-const HeaderLinks = () => {
-  return (
-    <div className="flex items-center gap-4">
-      <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">Docs</a>
-      <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">API Reference</a>
-      <a href="#" className="text-sm text-foreground hover:opacity-80 transition-opacity">Log in</a>
-      <a
-        href="#"
-        className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-sm font-medium hover:opacity-90 transition-opacity"
-      >
-        Sign up
-      </a>
-    </div>
-  )
-}
+import { CustomNavbar } from './src/components/Navbar.tsx'
 
 const config = {
   logo: <span className="font-bold text-lg">SelamAPI Platform</span>,
   logoLink: '/',
-  project: {
-    component: <HeaderLinks />,
+  components: {
+    Navbar: CustomNavbar,
   },
   useNextSeoProps() {
     const { frontMatter } = useConfig()
