@@ -2,95 +2,98 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* SelamAPI Documentation - OpenAI Inspired Dark Theme */
 
 @layer base {
   :root {
+    /* Light theme (fallback) - Dark theme is primary */
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 0 0% 9%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 0 0% 9%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 9%;
 
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-foreground: 0 0% 26.1%;
+    --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 0 0% 95.9%;
+    --sidebar-accent-foreground: 0 0% 9%;
+    --sidebar-border: 0 0% 91%;
+    --sidebar-ring: 0 0% 9%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
+    /* SelamAPI Dark Theme - Matching OpenAI docs */
+    --background: 0 0% 9.02%;       /* #171717 - Very dark charcoal */
+    --foreground: 0 0% 97.25%;      /* #f8f8f8 - Off-white text */
 
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 11.76%;            /* #1e1e1e - Slightly lighter cards */
+    --card-foreground: 0 0% 97.25%; 
 
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 11.76%;
+    --popover-foreground: 0 0% 97.25%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 0 0% 97.25%;         /* White for primary elements */
+    --primary-foreground: 0 0% 9.02%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 13.73%;       /* #232323 - Darker secondary */
+    --secondary-foreground: 0 0% 97.25%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15.69%;           /* #282828 - Code block background */
+    --muted-foreground: 0 0% 63.92%; /* #a3a3a3 - Muted text */
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 120 100% 50%;         /* Green accent for highlights */
+    --accent-foreground: 0 0% 9.02%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --border: 0 0% 19.61%;          /* #323232 - Subtle borders */
+    --input: 0 0% 15.69%;           /* Input background */
+    --ring: 120 100% 50%;           /* Green focus ring */
+
+    /* Sidebar colors matching OpenAI */
+    --sidebar-background: 0 0% 7.84%;   /* #141414 - Sidebar background */
+    --sidebar-foreground: 0 0% 97.25%;  
+    --sidebar-primary: 120 100% 50%;    /* Green for active items */
+    --sidebar-primary-foreground: 0 0% 9.02%;
+    --sidebar-accent: 0 0% 11.76%;      /* Hover state */
+    --sidebar-accent-foreground: 0 0% 97.25%;
+    --sidebar-border: 0 0% 19.61%;      
+    --sidebar-ring: 120 100% 50%;       
+
+    /* Code syntax highlighting colors */
+    --code-background: 0 0% 15.69%;     /* #282828 */
+    --code-comment: 0 0% 55%;           /* #8c8c8c */
+    --code-keyword: 197 100% 75%;       /* #7dd3fc - Blue keywords */
+    --code-string: 142 76% 73%;         /* #86efac - Green strings */
+    --code-number: 268 85% 76%;         /* #c084fc - Purple numbers */
+    --code-function: 48 96% 89%;        /* #fef3c7 - Yellow functions */
   }
 }
 
@@ -101,5 +104,39 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Custom scrollbar for webkit browsers */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground;
+  }
+
+  /* Code block styling */
+  .code-block {
+    @apply bg-muted rounded-lg border p-4 font-mono text-sm;
+  }
+
+  /* Search input styling */
+  .search-input {
+    @apply w-full bg-muted border-border text-foreground placeholder:text-muted-foreground;
   }
 }
